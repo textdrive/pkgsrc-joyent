@@ -2,10 +2,9 @@
 #
 
 DISTNAME=	smtools
-PKGNAME=	${DISTNAME}-${VERSION}
+PKGNAME=	${DISTNAME}-${PKGVERSION}
 CATEGORIES=	sysutils
-MASTER_SITES=	git@git.joyent.com
-DISTFILES=	# empty
+PKGVERSION=	20131016
 
 MAINTAINER=	filip@joyent.com
 HOMEPAGE=	http://www.joyent.com/
@@ -14,11 +13,12 @@ COMMENT=	Joyent tools relevant to SmartOS and SmartMachines
 
 PKG_DESTDIR_SUPPORT=	user-destdir
 
+GIT_REPOSITORIES=	smtools
+GIT_REPO.smtools=	git@git.joyent.com:smtools.git
+GIT_TAG=		${PKGVERSION}
+
 NO_CHECKSUM=	yes
 NO_BUILD=	yes
-WRKSRC=		${WRKDIR}/smtools
-
-VERSION=	20130621
 
 .include "../../mk/bsd.prefs.mk"
 
@@ -31,7 +31,7 @@ SM_SCRIPTS=	cpuinfo create-db create-dbuser create-vhost	\
 ZONEINIT_INCS=	00-mdata.sh 01-reboot-file.sh 02-config.sh	\
 		04-mdata.sh		\
 		11-files.sh 12-network.sh 91-passwords.sh	\
-		92-sshd.sh 93-pkgsrc.sh 999-cleanup.sh
+		92-sshd.sh 999-cleanup.sh
 PKGIN_HELPERS=	apt-get apt-cache pkg port rpm yum
 
 SUNOS_FLAVOR?=	joyent
@@ -52,14 +52,10 @@ SUBST_CLASSES+=	vars
 SUBST_STAGE.vars=	post-patch
 SUBST_MESSAGE.vars=	Configuring scripts
 SUBST_FILES.vars=	sm-prepare-image sm-rebuild-pkgsrc zoneinit/zoneinit.xml
-SUBST_VARS.vars=	PREFIX VARBASE PLATFORM PKGRELEASE MACHINE_ARCH
+SUBST_VARS.vars=	PREFIX PKG_SYSCONFDIR VARBASE PLATFORM PKGRELEASE MACHINE_ARCH
 SUBST_VARS.vars+=	MYSQL_VERSION_DEFAULT PGSQL_VERSION_DEFAULT
 SUBST_VARS.vars+=	PHP_VERSION_DEFAULT PYTHON_VERSION_DEFAULT
 SUBST_VARS.vars+=	RUBY_VERSION_DEFAULT RUBY_RAILS_DEFAULT
-
-do-fetch:
-do-extract:
-	cd ${WRKDIR} && git clone ${MASTER_SITES}:${DISTNAME}.git
 
 do-install:
 .	for file in ${SM_SCRIPTS}
@@ -86,4 +82,5 @@ do-install:
 	  ${DESTDIR}${PREFIX}/lib/zoneinit/includes
 .	endfor
 
+.include "../../wip/mk/git-package.mk"
 .include "../../mk/bsd.pkg.mk"
